@@ -4,6 +4,7 @@ require("dotenv").config();
 const i18next = require("i18next");
 const middleware = require("i18next-http-middleware");
 const Backend = require("i18next-fs-backend");
+const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -18,6 +19,15 @@ i18next
   });
 
 app.use(middleware.handle(i18next));
+
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "Accept-Language"],
+  }),
+);
 
 mongoose
   .connect(process.env.MONGODB_URI)
