@@ -1,13 +1,15 @@
-const express = require("express");
-const mongoose = require("mongoose");
-require("dotenv").config();
-const i18next = require("i18next");
-const middleware = require("i18next-http-middleware");
-const Backend = require("i18next-fs-backend");
-const cors = require("cors");
-const morgan = require("morgan");
+import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import i18next from "i18next";
+import middleware from "i18next-http-middleware";
+import Backend from "i18next-fs-backend";
+import cors from "cors";
+import morgan from "morgan";
 
-const categoryRoute = require("./routes/category.route");
+import categoryRoute from "./routes/category.route.js";
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8000;

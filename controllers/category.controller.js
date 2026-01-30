@@ -1,7 +1,7 @@
-const { Category } = require("../models/category.model");
+import { Category } from "../models/category.model.js";
 
 // POST /categories - Create a new category
-const createCategory = async (req, res) => {
+export const createCategory = async (req, res) => {
   try {
     if (!req.body.name || req.body.name.trim() < 3) {
       return res
@@ -21,7 +21,7 @@ const createCategory = async (req, res) => {
 };
 
 // GET /categories - Get all categories
-const getCategories = async (req, res) => {
+export const getCategories = async (req, res) => {
   try {
     const categories = await Category.find();
     return res.status(200).send({
@@ -34,7 +34,7 @@ const getCategories = async (req, res) => {
 };
 
 // DELETE /categories/:id - Delete a category
-const deleteCategory = async (req, res) => {
+export const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category) {
@@ -50,7 +50,7 @@ const deleteCategory = async (req, res) => {
 };
 
 // PUT /categories/:id - Update a category
-const updateCategory = async (req, res) => {
+export const updateCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndUpdate(
       req.params.id,
@@ -67,11 +67,4 @@ const updateCategory = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message, data: [] });
   }
-};
-
-module.exports = {
-  createCategory,
-  getCategories,
-  deleteCategory,
-  updateCategory,
 };

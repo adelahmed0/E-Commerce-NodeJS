@@ -1,11 +1,12 @@
-const express = require("express");
-const router = express.Router();
-const {
+import express from "express";
+import {
   createCategory,
   getCategories,
   deleteCategory,
   updateCategory,
-} = require("../controllers/category.controller");
+} from "../controllers/category.controller.js";
+
+const router = express.Router();
 
 // POST /categories
 router.post("/", createCategory);
@@ -19,4 +20,4 @@ router.delete("/:id", deleteCategory);
 // PUT /categories/:id
 router.put("/:id", updateCategory);
 
-module.exports = router;
+export default router;
