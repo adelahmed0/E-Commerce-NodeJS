@@ -4,6 +4,11 @@ const { Category } = require("../models/category.model");
 
 router.post("/", async (req, res) => {
   try {
+    if (!req.body.name || req.body.name.trim() < 3) {
+      return res
+        .status(400)
+        .json({ message: "Category name must be at least 3 characters long" });
+    }
     const newCategory = await Category.create({
       name: req.body.name,
     });
