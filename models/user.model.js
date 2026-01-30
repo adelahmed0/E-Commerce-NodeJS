@@ -17,7 +17,32 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
-    username: {
+    userName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    city: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    postalCode: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    addressLine1: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    addressLine2: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    phoneNumber: {
       type: String,
       required: true,
       trim: true,
@@ -29,4 +54,3 @@ const userSchema = new mongoose.Schema(
 const User = mongoose.model("User", userSchema);
 
 export default User;
-
