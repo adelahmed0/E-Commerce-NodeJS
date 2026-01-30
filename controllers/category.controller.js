@@ -1,22 +1,29 @@
 import Category from "../models/category.model.js";
+import { successResponse, errorResponse } from "../helpers/response.js";
 
 // POST /categories - Create a new category
 export const createCategory = async (req, res) => {
   try {
-    if (!req.body.name || req.body.name.trim() < 3) {
-      return res
-        .status(400)
-        .json({ message: "Category name must be at least 3 characters long" });
+    if (!req.body.name || req.body.name.trim().length < 3) {
+      return errorResponse(
+        res,
+        400,
+        "Category name must be at least 3 characters long",
+      );
     }
+
     const newCategory = await Category.create({
       name: req.body.name,
     });
-    return res.status(201).send({
-      message: "Category created successfully",
-      data: newCategory,
-    });
+
+    return successResponse(
+      res,
+      201,
+      "Category created successfully",
+      newCategory,
+    );
   } catch (error) {
-    res.status(500).json({ message: error.message, data: [] });
+    return errorResponse(res, 500, error.message);
   }
 };
 
@@ -24,12 +31,15 @@ export const createCategory = async (req, res) => {
 export const getCategories = async (req, res) => {
   try {
     const categories = await Category.find();
-    return res.status(200).send({
-      message: "Categories fetched successfully",
-      data: categories,
-    });
+
+    return successResponse(
+      res,
+      200,
+      "Categories fetched successfully",
+      categories,
+    );
   } catch (error) {
-    res.status(500).json({ message: error.message, data: [] });
+    return errorResponse(res, 500, error.message);
   }
 };
 
@@ -37,15 +47,14 @@ export const getCategories = async (req, res) => {
 export const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
+
     if (!category) {
-      return res.status(404).json({ message: "Category not found", data: [] });
+      return errorResponse(res, 404, "Category not found");
     }
-    return res.status(200).send({
-      message: "Category deleted successfully",
-      data: category,
-    });
+
+    return successResponse(res, 200, "Category deleted successfully", category);
   } catch (error) {
-    res.status(500).json({ message: error.message, data: [] });
+    return errorResponse(res, 500, error.message);
   }
 };
 
@@ -57,14 +66,13 @@ export const updateCategory = async (req, res) => {
       { name: req.body.name },
       { new: true },
     );
+
     if (!category) {
-      return res.status(404).json({ message: "Category not found", data: [] });
+      return errorResponse(res, 404, "Category not found");
     }
-    return res.status(200).send({
-      message: "Category updated successfully",
-      data: category,
-    });
+
+    return successResponse(res, 200, "Category updated successfully", category);
   } catch (error) {
-    res.status(500).json({ message: error.message, data: [] });
+    return errorResponse(res, 500, error.message);
   }
 };

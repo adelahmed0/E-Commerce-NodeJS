@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import { toJSONPlugin } from "../helpers/mongoosePlugins.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -52,6 +53,9 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// Apply toJSON plugin with password removal
+userSchema.plugin(toJSONPlugin, { removePassword: true });
+
 // Hash password before saving
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
@@ -62,13 +66,6 @@ userSchema.pre("save", async function () {
 // Compare password
 userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
-};
-
-// Remove password and _id from JSON response
-userSchema.methods.toJSON = function () {
-  const obj = this.toObject({ virtuals: true });
-  const { password, _id, id, ...rest } = obj;
-  return { id, ...rest };
 };
 
 const User = mongoose.model("User", userSchema);

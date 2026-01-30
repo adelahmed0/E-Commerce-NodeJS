@@ -9,6 +9,7 @@ import morgan from "morgan";
 
 import categoryRouter from "./routes/category.route.js";
 import authRouter from "./routes/auth.route.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
 
@@ -39,8 +40,13 @@ app.use(
   }),
 );
 
+// Routes
 app.use(`${api}/categories`, categoryRouter);
 app.use(`${api}/auth`, authRouter);
+
+// Error Handling Middleware
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 mongoose
   .connect(process.env.MONGODB_URI)

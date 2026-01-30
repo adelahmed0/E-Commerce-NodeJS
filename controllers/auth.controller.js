@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import { generateToken } from "../helpers/jwt.js";
+import { successResponse, errorResponse } from "../helpers/response.js";
 
 // POST /auth/register - Register a new user
 export const register = async (req, res) => {
@@ -19,10 +20,7 @@ export const register = async (req, res) => {
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: "User with this email already exists",
-      });
+      return errorResponse(res, 409, "User with this email already exists");
     }
 
     // Create new user
@@ -40,17 +38,14 @@ export const register = async (req, res) => {
 
     await user.save();
 
-    return res.status(201).json({
-      success: true,
-      message: "User created successfully",
-      data: user.toJSON(),
-    });
+    return successResponse(
+      res,
+      201,
+      "User created successfully",
+      user.toJSON(),
+    );
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to create user",
-      error: error.message,
-    });
+    return errorResponse(res, 500, "Failed to create user", error.message);
   }
 };
 
@@ -62,37 +57,23 @@ export const login = async (req, res) => {
     // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password",
-      });
+      return errorResponse(res, 401, "Invalid email or password");
     }
 
     // Check password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password",
-      });
+      return errorResponse(res, 401, "Invalid email or password");
     }
 
     // Generate token
     const token = generateToken(user);
 
-    return res.status(200).json({
-      success: true,
-      message: "Login successful",
-      data: {
-        user: user.toJSON(),
-        token,
-      },
+    return successResponse(res, 200, "Login successful", {
+      user: user.toJSON(),
+      token,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to login",
-      error: error.message,
-    });
+    return errorResponse(res, 500, "Failed to login", error.message);
   }
 };
