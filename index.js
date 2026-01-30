@@ -9,7 +9,7 @@ import morgan from "morgan";
 
 import categoryRouter from "./routes/category.route.js";
 import authRouter from "./routes/auth.route.js";
-import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.middleware.js";
 
 dotenv.config();
 
