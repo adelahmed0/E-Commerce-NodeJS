@@ -12,7 +12,9 @@ categorySchema.set("toJSON", {
   virtuals: true,
   versionKey: false,
   transform: function (doc, ret) {
-    delete ret._id;
+    // إعادة ترتيب الـ properties عشان id يكون الأول
+    const { _id, id, ...rest } = ret;
+    return { id, ...rest };
   },
 });
 
