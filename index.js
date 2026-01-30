@@ -5,6 +5,7 @@ const i18next = require("i18next");
 const middleware = require("i18next-http-middleware");
 const Backend = require("i18next-fs-backend");
 const cors = require("cors");
+const morgan = require("morgan");
 
 const categoryRoute = require("./routes/category.route");
 
@@ -23,6 +24,8 @@ i18next
 app.use(middleware.handle(i18next));
 
 app.use(express.json());
+
+app.use(morgan("tiny"));
 
 app.use(
   cors({
