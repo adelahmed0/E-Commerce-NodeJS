@@ -69,6 +69,13 @@ userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
+// Remove password and _id from JSON response
+userSchema.methods.toJSON = function () {
+  const obj = this.toObject({ virtuals: true });
+  const { password, _id, id, ...rest } = obj;
+  return { id, ...rest };
+};
+
 const User = mongoose.model("User", userSchema);
 
 export default User;
