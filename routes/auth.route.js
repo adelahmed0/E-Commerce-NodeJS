@@ -1,7 +1,8 @@
 import express from "express";
-import { register } from "../controllers/auth.controller.js";
+import { register, login } from "../controllers/auth.controller.js";
 import {
   validateRegistration,
+  validateLogin,
   handleValidationErrors,
 } from "../validators/auth.validator.js";
 
@@ -14,5 +15,8 @@ router.post(
   handleValidationErrors,
   register,
 );
+
+// POST /auth/login - Login user
+router.post("/login", validateLogin, handleValidationErrors, login);
 
 export default router;

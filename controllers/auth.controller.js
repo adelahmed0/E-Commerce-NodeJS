@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import { generateToken } from "../helpers/jwt.js";
 
 // POST /auth/register - Register a new user
 export const register = async (req, res) => {
@@ -48,6 +49,49 @@ export const register = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to create user",
+      error: error.message,
+    });
+  }
+};
+
+// POST /auth/login - Login user
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+
+    // Check password
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+
+    // Generate token
+    const token = generateToken(user);
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: {
+        user: user.toJSON(),
+        token,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to login",
       error: error.message,
     });
   }

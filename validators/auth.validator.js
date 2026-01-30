@@ -74,6 +74,21 @@ export const validateRegistration = [
     .withMessage("Role must be either 'user' or 'admin'"),
 ];
 
+// Validation rules for login
+export const validateLogin = [
+  // Email validation
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Please provide a valid email address")
+    .normalizeEmail(),
+
+  // Password validation
+  body("password").notEmpty().withMessage("Password is required"),
+];
+
 // Middleware to handle validation errors
 export const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
