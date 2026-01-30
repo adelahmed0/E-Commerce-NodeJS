@@ -6,6 +6,8 @@ const middleware = require("i18next-http-middleware");
 const Backend = require("i18next-fs-backend");
 const cors = require("cors");
 
+const categoryRoute = require("./routes/category.route");
+
 const app = express();
 const PORT = process.env.PORT || 8000;
 const api = process.env.API_PREFIX;
@@ -20,6 +22,8 @@ i18next
 
 app.use(middleware.handle(i18next));
 
+app.use(express.json());
+
 app.use(
   cors({
     origin: "*",
@@ -28,6 +32,8 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization", "Accept-Language"],
   }),
 );
+
+app.use(`${api}/categories`, categoryRoute);
 
 mongoose
   .connect(process.env.MONGODB_URI)
