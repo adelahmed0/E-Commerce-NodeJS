@@ -7,7 +7,8 @@ import Backend from "i18next-fs-backend";
 import cors from "cors";
 import morgan from "morgan";
 
-import categoryRoute from "./routes/category.route.js";
+import categoryRouter from "./routes/category.route.js";
+import authRouter from "./routes/auth.route.js";
 
 dotenv.config();
 
@@ -38,7 +39,8 @@ app.use(
   }),
 );
 
-app.use(`${api}/categories`, categoryRoute);
+app.use(`${api}/categories`, categoryRouter);
+app.use(`${api}/auth`, authRouter);
 
 mongoose
   .connect(process.env.MONGODB_URI)
