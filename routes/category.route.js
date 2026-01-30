@@ -12,9 +12,24 @@ router.post("/", async (req, res) => {
     const newCategory = await Category.create({
       name: req.body.name,
     });
-    return res.status(201).send(newCategory);
+    return res.status(201).send({
+      message: "Category created successfully",
+      data: newCategory,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message, data: [] });
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const categories = await Category.find();
+    return res.status(200).send({
+      message: "Categories fetched successfully",
+      data: categories,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message, data: [] });
   }
 });
 
