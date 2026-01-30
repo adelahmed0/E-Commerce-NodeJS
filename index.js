@@ -9,8 +9,11 @@ import morgan from "morgan";
 
 import categoryRouter from "./routes/category.route.js";
 import authRouter from "./routes/auth.route.js";
-import { errorHandler, notFoundHandler } from "./middleware/errorHandler.middleware.js";
-
+import {
+  errorHandler,
+  notFoundHandler,
+} from "./middleware/errorHandler.middleware.js";
+import { authMiddleware } from "./middleware/auth.middleware.js";
 dotenv.config();
 
 const app = express();
@@ -39,6 +42,8 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization", "Accept-Language"],
   }),
 );
+
+app.use(authMiddleware);
 
 // Routes
 app.use(`${api}/categories`, categoryRouter);
