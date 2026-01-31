@@ -77,3 +77,20 @@ export const login = async (req, res) => {
     return errorResponse(res, 500, "Failed to login", error.message);
   }
 };
+
+export const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.auth.id).select("-password");
+    if (!user) {
+      return errorResponse(res, 404, "User not found");
+    }
+    return successResponse(
+      res,
+      200,
+      "Profile fetched successfully",
+      user.toJSON(),
+    );
+  } catch (error) {
+    return errorResponse(res, 500, "Failed to get profile", error.message);
+  }
+};

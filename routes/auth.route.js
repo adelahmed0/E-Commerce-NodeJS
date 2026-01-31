@@ -1,10 +1,11 @@
 import express from "express";
-import { register, login } from "../controllers/auth.controller.js";
+import { register, login, getProfile } from "../controllers/auth.controller.js";
 import {
   validateRegistration,
   validateLogin,
   handleValidationErrors,
 } from "../validators/auth.validator.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -18,5 +19,8 @@ router.post(
 
 // POST /auth/login - Login user
 router.post("/login", validateLogin, handleValidationErrors, login);
+
+// GET /auth/profile - Get user profile
+router.get("/profile", authMiddleware, getProfile);
 
 export default router;
