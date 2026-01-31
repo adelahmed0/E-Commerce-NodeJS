@@ -1,4 +1,5 @@
 import { body, validationResult } from "express-validator";
+import { VALID_ROLES } from "../enums/roles.js";
 
 // Validation rules for registration
 export const validateRegistration = [
@@ -70,8 +71,8 @@ export const validateRegistration = [
   // Role validation (optional, defaults to "user")
   body("role")
     .optional()
-    .isIn(["user", "admin"])
-    .withMessage("Role must be either 'user' or 'admin'"),
+    .isIn(VALID_ROLES)
+    .withMessage(`Role must be one of: ${VALID_ROLES.join(", ")}`),
 ];
 
 // Validation rules for login
@@ -87,6 +88,61 @@ export const validateLogin = [
 
   // Password validation
   body("password").notEmpty().withMessage("Password is required"),
+];
+
+// Validation rules for updating profile
+export const validateUpdateProfile = [
+  // Email validation (optional)
+  body("email")
+    .optional()
+    .trim()
+    .isEmail()
+    .withMessage("Please provide a valid email address")
+    .normalizeEmail(),
+
+  // Username validation (optional)
+  body("userName")
+    .optional()
+    .trim()
+    .isLength({ min: 3, max: 50 })
+    .withMessage("Username must be between 3 and 50 characters"),
+
+  // City validation (optional)
+  body("city")
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage("City must be between 2 and 100 characters"),
+
+  // Postal code validation (optional)
+  body("postalCode")
+    .optional()
+    .trim()
+    .isLength({ min: 3, max: 20 })
+    .withMessage("Postal code must be between 3 and 20 characters"),
+
+  // Address Line 1 validation (optional)
+  body("addressLine1")
+    .optional()
+    .trim()
+    .isLength({ min: 5, max: 200 })
+    .withMessage("Address Line 1 must be between 5 and 200 characters"),
+
+  // Address Line 2 validation (optional)
+  body("addressLine2")
+    .optional()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage("Address Line 2 must be less than 200 characters"),
+
+  // Phone number validation (optional)
+  body("phoneNumber")
+    .optional()
+    .trim()
+    .matches(/^[\d\s\-\+\(\)]+$/)
+    .withMessage("Please provide a valid phone number")
+    .isLength({ min: 10, max: 20 })
+    .withMessage("Phone number must be between 10 and 20 characters"),
 ];
 
 // Middleware to handle validation errors

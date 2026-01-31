@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { toJSONPlugin } from "../helpers/mongoosePlugins.js";
+import ROLES, { VALID_ROLES } from "../enums/roles.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -16,8 +17,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user",
+      enum: VALID_ROLES,
+      default: ROLES.USER,
     },
     userName: {
       type: String,

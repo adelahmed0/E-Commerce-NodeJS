@@ -8,6 +8,7 @@ import {
 import {
   validateRegistration,
   validateLogin,
+  validateUpdateProfile,
   handleValidationErrors,
 } from "../validators/auth.validator.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -29,6 +30,12 @@ router.post("/login", validateLogin, handleValidationErrors, login);
 router.get("/profile", authMiddleware, getProfile);
 
 // PUT /auth/profile - Update user profile
-router.put("/profile", authMiddleware, updateProfile);
+router.put(
+  "/profile",
+  authMiddleware,
+  validateUpdateProfile,
+  handleValidationErrors,
+  updateProfile,
+);
 
 export default router;
