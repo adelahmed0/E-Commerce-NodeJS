@@ -1,5 +1,10 @@
 import express from "express";
-import { register, login, getProfile } from "../controllers/auth.controller.js";
+import {
+  register,
+  login,
+  getProfile,
+  updateProfile,
+} from "../controllers/auth.controller.js";
 import {
   validateRegistration,
   validateLogin,
@@ -22,5 +27,8 @@ router.post("/login", validateLogin, handleValidationErrors, login);
 
 // GET /auth/profile - Get user profile
 router.get("/profile", authMiddleware, getProfile);
+
+// PUT /auth/profile - Update user profile
+router.put("/profile", authMiddleware, updateProfile);
 
 export default router;

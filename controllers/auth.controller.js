@@ -94,3 +94,25 @@ export const getProfile = async (req, res) => {
     return errorResponse(res, 500, "Failed to get profile", error.message);
   }
 };
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.auth.id;
+    const updateBody = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return errorResponse(res, 404, "User not found");
+    }
+    user.set(updateBody);
+    await user.save();
+    return successResponse(
+      res,
+      200,
+      "Profile updated successfully",
+      user.toJSON(),
+    );
+  } catch (error) {
+    return errorResponse(res, 500, "Failed to update profile", error.message);
+  }
+};
