@@ -5,19 +5,20 @@ import {
   deleteCategory,
   updateCategory,
 } from "../controllers/category.controller.js";
+import { adminAuth } from "../middleware/roles.middleware.js";
 
 const router = express.Router();
 
 // POST /categories
-router.post("/", createCategory);
+router.post("/",adminAuth, createCategory);
 
 // GET /categories
 router.get("/", getCategories);
 
 // DELETE /categories/:id
-router.delete("/:id", deleteCategory);
+router.delete("/:id",adminAuth, deleteCategory);
 
 // PUT /categories/:id
-router.put("/:id", updateCategory);
+router.put("/:id",adminAuth, updateCategory);
 
 export default router;
