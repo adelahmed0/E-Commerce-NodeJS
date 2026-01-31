@@ -100,6 +100,16 @@ export const updateProfile = async (req, res) => {
     const userId = req.auth.id;
     const updateBody = req.body;
 
+    if (updateBody.email) {
+      const existingUser = await User.findOne({
+        email: updateBody.email,
+        _id: { $ne: userId },
+      });
+      if (existingUser) {
+        return errorResponse(res, 409, "Email already exists");
+      }
+    }
+
     const user = await User.findById(userId);
     if (!user) {
       return errorResponse(res, 404, "User not found");
