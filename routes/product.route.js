@@ -1,10 +1,10 @@
 import express from "express";
-import { createProduct } from "../controllers/product.controller.js";
+import { createProduct, getProducts } from "../controllers/product.controller.js";
 import {
   handleUploadError,
   uploadMultipleImages,
 } from "../middleware/upload.middleware.js";
-import { adminAuth } from "../middleware/roles.middleware.js";
+import { adminAndUserAuth, adminAuth } from "../middleware/roles.middleware.js";
 import {
   validateCreateProduct,
   handleValidationErrors,
@@ -21,5 +21,7 @@ router.post(
   handleValidationErrors,
   createProduct,
 );
+
+router.get("/",adminAndUserAuth, getProducts);
 
 export default router;

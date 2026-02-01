@@ -29,3 +29,12 @@ export const createProduct = async (req, res) => {
     return errorResponse(res, 500, "Failed to create product", error.message);
   }
 };
+
+export const getProducts = async (req, res) => {
+  try {
+    const products = await Product.find().populate("category");
+    return successResponse(res, 200, "Products fetched successfully", products);
+  } catch (error) {
+    return errorResponse(res, 500, "Failed to fetch products", error.message);
+  }
+};
