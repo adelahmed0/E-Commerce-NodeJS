@@ -10,6 +10,7 @@ import morgan from "morgan";
 import categoryRouter from "./routes/category.route.js";
 import authRouter from "./routes/auth.route.js";
 import productRouter from "./routes/product.route.js";
+import orderRouter from "./routes/order.route.js";
 import {
   errorHandler,
   notFoundHandler,
@@ -51,6 +52,7 @@ app.use("/public/uploads", express.static("public/uploads"));
 app.use(`${api}/categories`, categoryRouter);
 app.use(`${api}/auth`, authRouter);
 app.use(`${api}/products`, productRouter);
+app.use(`${api}/orders`, orderRouter);
 
 // Error Handling Middleware
 app.use(notFoundHandler);
