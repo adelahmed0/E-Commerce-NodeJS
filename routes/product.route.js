@@ -1,5 +1,9 @@
 import express from "express";
-import { createProduct, getProducts } from "../controllers/product.controller.js";
+import {
+  createProduct,
+  getProducts,
+  getProductById,
+} from "../controllers/product.controller.js";
 import {
   handleUploadError,
   uploadMultipleImages,
@@ -22,6 +26,8 @@ router.post(
   createProduct,
 );
 
-router.get("/",adminAndUserAuth, getProducts);
+router.get("/", adminAndUserAuth, getProducts);
+
+router.get("/:id", adminAndUserAuth, getProductById);
 
 export default router;

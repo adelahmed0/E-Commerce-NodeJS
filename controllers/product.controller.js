@@ -70,3 +70,19 @@ export const getProducts = async (req, res) => {
     return errorResponse(res, 500, "Failed to fetch products", error.message);
   }
 };
+
+export const getProductById = async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true },
+    ).populate("category");
+    if (!product) {
+      return errorResponse(res, 404, "Product not found");
+    }
+    return successResponse(res, 200, "Product fetched successfully", product);
+  } catch (error) {
+    return errorResponse(res, 500, "Failed to fetch product", error.message);
+  }
+};
