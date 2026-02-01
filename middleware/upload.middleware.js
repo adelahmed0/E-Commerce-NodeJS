@@ -36,12 +36,35 @@ const upload = multer({
   },
 });
 
-export const uploadSingleImage = upload.single("image");
-export const uploadMultipleImages = upload.array("images", 10);
+const uploadSingleImage = upload.single("image");
+const uploadMultipleImages = upload.array("images", 10);
 
-export const getFileUrl = (req, filename) => {
+const getFileUrl = (req, filename) => {
   const protocol = req.protocol; // http or https
   const host = req.get("host"); // localhost:3000 or 127.0.0.1:3000 or your domain name
 
   return `${protocol}://${host}/public/uploads/${filename}`;
+};
+
+const handleUploadError = (error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    switch (error.code) {
+      case "LIMIT_FILE_SIZE":
+        return errorResponse(res, 400, "File size exceeds limit");
+      case "LIMIT_FILE_COUNT":
+        return errorResponse(res, 400, "Too many files");
+      default:
+        return errorResponse(res, 500, "Failed to upload file");
+    }
+  } else if (error) {
+    return errorResponse(res, 400, "Failed to upload file", error.message);
+  }
+  next();
+};
+
+export {
+  uploadSingleImage,
+  uploadMultipleImages,
+  getFileUrl,
+  handleUploadError,
 };
