@@ -34,6 +34,11 @@ export const getProducts = async (req, res) => {
   try {
     const search = req.query.search;
     const categoryId = req.query.categoryId;
+
+    const page = parseInt(req.query.page) || 1;
+    const per_page = parseInt(req.query.per_page) || 5;
+    const skip = (page - 1) * per_page;
+
     const filter = {};
 
     if (search) {
@@ -42,11 +47,25 @@ export const getProducts = async (req, res) => {
         { description: { $regex: search, $options: "i" } },
       ];
     }
-    if(categoryId){
+    if (categoryId) {
       filter.category = categoryId;
     }
-    const products = await Product.find(filter).populate("category");
-    return successResponse(res, 200, "Products fetched successfully", products);
+    const products = await Product.find(filter)
+      .populate("category")
+      .skip(skip)
+      .limit(per_page);
+
+    const totalProducts = await Product.countDocuments(filter);
+    const totalPages = Math.ceil(totalProducts / per_page);
+    return successResponse(res, 200, "Products fetched successfully", {
+      products,
+      pagination: {
+        total_count: totalProducts,
+        current_page: page,
+        last_page: totalPages,
+        per_page: per_page,
+      },
+    });
   } catch (error) {
     return errorResponse(res, 500, "Failed to fetch products", error.message);
   }
