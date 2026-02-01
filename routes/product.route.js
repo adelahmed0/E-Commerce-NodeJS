@@ -13,6 +13,7 @@ import {
 import { adminAndUserAuth, adminAuth } from "../middleware/roles.middleware.js";
 import {
   validateCreateProduct,
+  validateUpdateProduct,
   handleValidationErrors,
 } from "../validators/product.validator.js";
 
@@ -37,6 +38,8 @@ router.put(
   adminAuth,
   uploadMultipleImages,
   handleUploadError,
+  validateUpdateProduct,
+  handleValidationErrors,
   updateProduct,
 );
 
