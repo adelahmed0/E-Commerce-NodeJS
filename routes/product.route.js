@@ -4,6 +4,7 @@ import {
   getProducts,
   getProductById,
   deleteProduct,
+  updateProduct,
 } from "../controllers/product.controller.js";
 import {
   handleUploadError,
@@ -30,6 +31,14 @@ router.post(
 router.get("/", adminAndUserAuth, getProducts);
 
 router.get("/:id", adminAndUserAuth, getProductById);
+
+router.put(
+  "/:id",
+  adminAuth,
+  uploadMultipleImages,
+  handleUploadError,
+  updateProduct,
+);
 
 router.delete("/:id", adminAuth, deleteProduct);
 

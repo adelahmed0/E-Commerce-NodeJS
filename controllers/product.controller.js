@@ -98,3 +98,47 @@ export const deleteProduct = async (req, res) => {
     return errorResponse(res, 500, "Failed to delete product", error.message);
   }
 };
+
+export const updateProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return errorResponse(res, 404, "Product not found");
+    }
+
+    const { title, category, price, description, countInStock } = req.body;
+    let updateData = {
+      title,
+      category,
+      price: price ? parseFloat(price) : undefined,
+      description,
+      countInStock: countInStock ? parseInt(countInStock) : undefined,
+    };
+
+    // Remove undefined fields
+    Object.keys(updateData).forEach(
+      (key) => updateData[key] === undefined && delete updateData[key],
+    );
+
+    if (req.files && req.files.length > 0) {
+      updateData.images = req.files.map((file) =>
+        getFileUrl(req, file.filename),
+      );
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true },
+    ).populate("category");
+
+    return successResponse(
+      res,
+      200,
+      "Product updated successfully",
+      updatedProduct,
+    );
+  } catch (error) {
+    return errorResponse(res, 500, "Failed to update product", error.message);
+  }
+};
