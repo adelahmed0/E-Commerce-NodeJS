@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import OrderStatus, { ORDER_STATUS_VALUES } from "../enums/orderStatus.js";
+import { toJSONPlugin } from "../helpers/mongoosePlugins.js";
 
 const orderItemSchema = new mongoose.Schema({
   product: {
@@ -41,7 +42,23 @@ const orderSchema = new mongoose.Schema(
     },
   },
   { timestamps: true },
+  { toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
+
+orderSchema.plugin(toJSONPlugin);
+
+orderSchema.methods.calcTotalPrice = function () {
+  return this.items.reduce((total, item) => {
+    return total + item.price * item.quantity;
+  }, 0);
+};
+
+orderSchema.pre("save", function (next) {
+  if (this.isModified("items") || !this.totalPrice) {
+    this.totalPrice = this.calcTotalPrice();
+  }
+  next();
+});
 
 const Order = mongoose.model("Order", orderSchema);
 export default Order;
