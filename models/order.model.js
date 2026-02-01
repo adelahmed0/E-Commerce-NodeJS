@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import OrderStatus, { ORDER_STATUS_VALUES } from "../enums/orderStatus.js";
 
 const orderItemSchema = new mongoose.Schema({
   product: {
@@ -32,8 +33,11 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
-      default: "pending",
+      enum: {
+        values: ORDER_STATUS_VALUES,
+        message: "Invalid status value",
+      },
+      default: OrderStatus.PENDING,
     },
   },
   { timestamps: true },
