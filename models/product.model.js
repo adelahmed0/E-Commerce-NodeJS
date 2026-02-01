@@ -27,10 +27,10 @@ const productSchema = new mongoose.Schema(
       minlength: [5, "Product description must be at least 5 characters"],
       maxlength: [1000, "Product description cannot exceed 1000 characters"],
     },
-    // images: {
-    //   type: [String],
-    //   required: [true, "At least one product image is required"],
-    // },
+    images: {
+      type: [String],
+      required: [true, "At least one product image is required"],
+    },
     countInStock: {
       type: Number,
       required: [true, "Product stock count is required"],
