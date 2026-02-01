@@ -3,6 +3,7 @@ import {
   createProduct,
   getProducts,
   getProductById,
+  deleteProduct,
 } from "../controllers/product.controller.js";
 import {
   handleUploadError,
@@ -29,5 +30,7 @@ router.post(
 router.get("/", adminAndUserAuth, getProducts);
 
 router.get("/:id", adminAndUserAuth, getProductById);
+
+router.delete("/:id", adminAuth, deleteProduct);
 
 export default router;

@@ -86,3 +86,15 @@ export const getProductById = async (req, res) => {
     return errorResponse(res, 500, "Failed to fetch product", error.message);
   }
 };
+
+export const deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return errorResponse(res, 404, "Product not found");
+    }
+    return successResponse(res, 200, "Product deleted successfully");
+  } catch (error) {
+    return errorResponse(res, 500, "Failed to delete product", error.message);
+  }
+};
