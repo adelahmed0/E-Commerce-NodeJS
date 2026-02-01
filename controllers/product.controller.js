@@ -33,6 +33,7 @@ export const createProduct = async (req, res) => {
 export const getProducts = async (req, res) => {
   try {
     const search = req.query.search;
+    const categoryId = req.query.categoryId;
     const filter = {};
 
     if (search) {
@@ -40,6 +41,9 @@ export const getProducts = async (req, res) => {
         { title: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
       ];
+    }
+    if(categoryId){
+      filter.category = categoryId;
     }
     const products = await Product.find(filter).populate("category");
     return successResponse(res, 200, "Products fetched successfully", products);
