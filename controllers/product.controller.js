@@ -32,7 +32,16 @@ export const createProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate("category");
+    const search = req.query.search;
+    const filter = {};
+
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+    const products = await Product.find(filter).populate("category");
     return successResponse(res, 200, "Products fetched successfully", products);
   } catch (error) {
     return errorResponse(res, 500, "Failed to fetch products", error.message);
