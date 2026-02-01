@@ -45,6 +45,7 @@ app.use(
 );
 
 app.use(authMiddleware);
+app.use("/public/uploads", express.static("public/uploads"));
 
 // Routes
 app.use(`${api}/categories`, categoryRouter);

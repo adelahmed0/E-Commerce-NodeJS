@@ -7,6 +7,7 @@ const publicRoutes = [
   "POST:/api/auth/login",
   "POST:/api/auth/register",
   "GET:/api/categories",
+  "GET:/public/uploads",
 ];
 
 /**
@@ -16,7 +17,17 @@ export const authMiddleware = async (req, res, next) => {
   const route = `${req.method}:${req.path}`;
 
   // Skip authentication for public routes
-  if (publicRoutes.includes(route)) {
+  const isPublic = publicRoutes.some((pub) => {
+    if (pub === route) return true;
+    if (
+      pub === "GET:/public/uploads" &&
+      req.path.startsWith("/public/uploads/")
+    )
+      return true;
+    return false;
+  });
+
+  if (isPublic) {
     return next();
   }
 
