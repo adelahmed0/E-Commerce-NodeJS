@@ -21,14 +21,14 @@ export const createOrder = async (req, res) => {
         return errorResponse(res, 404, "Product not found");
       }
 
-      if(typeof item.quantity !== "number" || item.quantity < 1){
+      if (typeof item.quantity !== "number" || item.quantity < 1) {
         return errorResponse(res, 400, "Invalid quantity");
       }
-      if(!Number.isInteger(item.quantity)){
+      if (!Number.isInteger(item.quantity)) {
         return errorResponse(res, 400, "Invalid quantity");
       }
     }
-    successResponse(res, 201, "Order created successfully", order);
+    
   } catch (error) {
     errorResponse(res, 500, "Failed to create order", error.message);
   }
