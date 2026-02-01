@@ -107,6 +107,8 @@ export const updateProduct = async (req, res) => {
     }
 
     const { title, category, price, description, countInStock } = req.body;
+    const isReplacement = req.body.newImages === "true";
+
     let updateData = {
       title,
       category,
@@ -121,9 +123,17 @@ export const updateProduct = async (req, res) => {
     );
 
     if (req.files && req.files.length > 0) {
-      updateData.images = req.files.map((file) =>
+      const uploadedImages = req.files.map((file) =>
         getFileUrl(req, file.filename),
       );
+
+      if (isReplacement) {
+        // Replace old images with new ones
+        updateData.images = uploadedImages;
+      } else {
+        // Append new images to existing ones
+        updateData.images = [...product.images, ...uploadedImages];
+      }
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
