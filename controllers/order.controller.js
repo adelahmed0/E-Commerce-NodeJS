@@ -164,7 +164,11 @@ export const updateOrderStatus = async (req, res) => {
     }
 
     if (!ORDER_STATUS_VALUES.includes(status)) {
-      return errorResponse(res, 400, "Invalid status must be one of " + ORDER_STATUS_VALUES.join(", "));
+      return errorResponse(
+        res,
+        400,
+        "Invalid status must be one of " + ORDER_STATUS_VALUES.join(", "),
+      );
     }
 
     const order = await Order.findByIdAndUpdate(
@@ -180,5 +184,43 @@ export const updateOrderStatus = async (req, res) => {
     successResponse(res, 200, "Order updated successfully", order);
   } catch (error) {
     errorResponse(res, 500, "Failed to update order", error.message);
+  }
+};
+
+export const cancelOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { auth: currentUser } = req;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return errorResponse(res, 404, "Order not found");
+    }
+
+    // Check ownership
+    if (order.user.toString() !== currentUser.id.toString()) {
+      return errorResponse(
+        res,
+        403,
+        "You are not authorized to cancel this order",
+      );
+    }
+
+    // Check status
+    if (order.status === "shipped" || order.status === "delivered") {
+      return errorResponse(
+        res,
+        400,
+        `Cannot cancel order because it is already ${order.status}`,
+      );
+    }
+
+    order.status = "cancelled";
+    await order.save();
+
+    successResponse(res, 200, "Order cancelled successfully", order);
+  } catch (error) {
+    errorResponse(res, 500, "Failed to cancel order", error.message);
   }
 };

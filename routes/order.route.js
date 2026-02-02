@@ -5,6 +5,7 @@ import {
   getOrderById,
   deleteOrder,
   updateOrderStatus,
+  cancelOrder,
 } from "../controllers/order.controller.js";
 import { adminAndUserAuth, adminAuth } from "../middleware/roles.middleware.js";
 
@@ -19,5 +20,7 @@ router.get("/:id", adminAndUserAuth, getOrderById);
 router.delete("/:id", adminAuth, deleteOrder);
 
 router.patch("/:id/change-status", adminAuth, updateOrderStatus);
+
+router.patch("/:id/cancel-order", adminAndUserAuth, cancelOrder);
 
 export default router;
