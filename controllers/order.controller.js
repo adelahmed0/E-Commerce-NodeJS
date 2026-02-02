@@ -70,3 +70,42 @@ export const createOrder = async (req, res) => {
     errorResponse(res, 500, "Failed to create order", error.message);
   }
 };
+
+export const getOrders = async (req, res) => {
+  try {
+    const { auth: currentUser } = req;
+    const isAdmin = currentUser.role === "admin";
+
+    const page = parseInt(req.query.page) || 1;
+    const per_page = parseInt(req.query.per_page) || 5;
+    const search = req.query.search || "";
+    const skip = (page - 1) * per_page;
+
+    const filter = {};
+    if (!isAdmin) {
+      filter.user = currentUser.id;
+    }
+    if (search) {
+      filter.search = search;
+    }
+    const orders = await Order.find(filter)
+      .sort({ date: -1 })
+      .populate("user")
+      .populate("items.product")
+      .skip(skip)
+      .limit(per_page);
+    const totalOrders = await Order.countDocuments(filter);
+    const totalPages = Math.ceil(totalOrders / per_page);
+    successResponse(res, 200, "Orders fetched successfully", {
+      orders,
+      pagination: {
+        total_count: totalOrders,
+        current_page: page,
+        last_page: totalPages,
+        per_page: per_page,
+      },
+    });
+  } catch (error) {
+    errorResponse(res, 500, "Failed to fetch orders", error.message);
+  }
+};
