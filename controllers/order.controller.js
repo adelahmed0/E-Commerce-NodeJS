@@ -1,6 +1,7 @@
 import { successResponse, errorResponse } from "../helpers/response.js";
 import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
+import { ORDER_STATUS_VALUES } from "../enums/orderStatus.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -152,5 +153,32 @@ export const deleteOrder = async (req, res) => {
     successResponse(res, 200, "Order deleted successfully", order);
   } catch (error) {
     errorResponse(res, 500, "Failed to delete order", error.message);
+  }
+};
+
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!status) {
+      return errorResponse(res, 400, "Status is required");
+    }
+
+    if (!ORDER_STATUS_VALUES.includes(status)) {
+      return errorResponse(res, 400, "Invalid status must be one of " + ORDER_STATUS_VALUES.join(", "));
+    }
+
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true },
+    );
+
+    if (!order) {
+      return errorResponse(res, 404, "Order not found");
+    }
+
+    successResponse(res, 200, "Order updated successfully", order);
+  } catch (error) {
+    errorResponse(res, 500, "Failed to update order", error.message);
   }
 };
