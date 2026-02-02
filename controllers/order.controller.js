@@ -86,7 +86,7 @@ export const getOrders = async (req, res) => {
       filter.user = currentUser.id;
     }
     if (search) {
-      filter.search = search;
+      filter.$or = [{ status: { $regex: search, $options: "i" } }];
     }
     const orders = await Order.find(filter)
       .sort({ date: -1 })
