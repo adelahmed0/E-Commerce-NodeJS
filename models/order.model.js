@@ -52,11 +52,10 @@ orderSchema.methods.calcTotalPrice = function () {
   }, 0);
 };
 
-orderSchema.pre("save", function (next) {
+orderSchema.pre("save", async function () {
   if (this.isModified("items") || !this.totalPrice) {
     this.totalPrice = this.calcTotalPrice();
   }
-  next();
 });
 
 const Order = mongoose.model("Order", orderSchema);

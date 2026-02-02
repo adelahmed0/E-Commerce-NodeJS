@@ -15,12 +15,6 @@ export const createOrder = async (req, res) => {
       if (!item.product || !item.quantity) {
         return errorResponse(res, 400, "Invalid order items");
       }
-
-      const product = await Product.findById(item.product);
-      if (!product) {
-        return errorResponse(res, 404, "Product not found");
-      }
-
       if (typeof item.quantity !== "number" || item.quantity < 1) {
         return errorResponse(res, 400, "Invalid quantity");
       }
@@ -28,7 +22,43 @@ export const createOrder = async (req, res) => {
         return errorResponse(res, 400, "Invalid quantity");
       }
     }
-    
+    const productsIds = orderItems.map((item) => item.product);
+
+    const products = await Product.find({ _id: { $in: productsIds } });
+    if (products.length !== productsIds.length) {
+      return errorResponse(res, 404, "Some products not found");
+    }
+
+    const ordersItemsWithPrices = [];
+
+    for (const item of orderItems) {
+      const product = products.find(
+        (product) => product._id.toString() === item.product,
+      );
+      if (product.countInStock < item.quantity) {
+        return errorResponse(
+          res,
+          400,
+          `Product ${product.title} is out of stock`,
+        );
+      }
+      ordersItemsWithPrices.push({
+        product: item.product,
+        quantity: item.quantity,
+        price: product.price,
+      });
+    }
+    const totalPrice = ordersItemsWithPrices.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0,
+    );
+    const newOrder = new Order({
+      items: ordersItemsWithPrices,
+      user: currentUser.id,
+      totalPrice,
+    });
+    const savedOrder = await newOrder.save();
+    successResponse(res, 201, "Order created successfully", savedOrder);
   } catch (error) {
     errorResponse(res, 500, "Failed to create order", error.message);
   }
