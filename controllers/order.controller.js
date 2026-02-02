@@ -89,9 +89,10 @@ export const getOrders = async (req, res) => {
       filter.$or = [{ status: { $regex: search, $options: "i" } }];
     }
     const orders = await Order.find(filter)
-      .sort({ date: -1 })
-      .populate("user")
-      .populate("items.product")
+      .sort({ createdAt: -1 })
+      .populate("user", "userName email")
+      .populate("items.product", "title price images")
+      .select("user items totalPrice status createdAt")
       .skip(skip)
       .limit(per_page);
     const totalOrders = await Order.countDocuments(filter);
@@ -107,5 +108,35 @@ export const getOrders = async (req, res) => {
     });
   } catch (error) {
     errorResponse(res, 500, "Failed to fetch orders", error.message);
+  }
+};
+
+export const getOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id)
+      .populate("user")
+      .populate("items.product");
+
+    if (!order) {
+      return errorResponse(res, 404, "Order not found");
+    }
+
+    const { auth: currentUser } = req;
+
+    if (
+      currentUser.id.toString() !== order.user._id.toString() &&
+      currentUser.role !== "admin"
+    ) {
+      return errorResponse(
+        res,
+        403,
+        "You are not authorized to view this order",
+      );
+    }
+
+    successResponse(res, 200, "Order fetched successfully", order);
+  } catch (error) {
+    errorResponse(res, 500, "Failed to fetch order", error.message);
   }
 };
