@@ -36,11 +36,7 @@ export const createOrder = async (req, res) => {
         (product) => product._id.toString() === item.product,
       );
       if (product.countInStock < item.quantity) {
-        return errorResponse(
-          res,
-          400,
-          `Product ${product.title} is out of stock`,
-        );
+        return errorResponse(res, 400, `This product is out of stock`);
       }
       ordersItemsWithPrices.push({
         product: item.product,
@@ -57,8 +53,15 @@ export const createOrder = async (req, res) => {
       user: currentUser.id,
       totalPrice,
     });
-    const savedOrder = await newOrder.save()
-    
+    const savedOrder = await newOrder.save();
+
+    // update product stock
+    for (const item of ordersItemsWithPrices) {
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { countInStock: -item.quantity },
+      });
+    }
+
     const order = await Order.findById(savedOrder._id)
       .populate("user")
       .populate("items.product");
