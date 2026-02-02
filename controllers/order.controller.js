@@ -140,3 +140,17 @@ export const getOrderById = async (req, res) => {
     errorResponse(res, 500, "Failed to fetch order", error.message);
   }
 };
+
+export const deleteOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findByIdAndDelete(id);
+
+    if (!order) {
+      return errorResponse(res, 404, "Order not found");
+    }
+    successResponse(res, 200, "Order deleted successfully", order);
+  } catch (error) {
+    errorResponse(res, 500, "Failed to delete order", error.message);
+  }
+};
