@@ -219,6 +219,13 @@ export const cancelOrder = async (req, res) => {
     order.status = "cancelled";
     await order.save();
 
+    // Increment product stock
+    for (const item of order.items) {
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { countInStock: item.quantity },
+      });
+    }
+
     successResponse(res, 200, "Order cancelled successfully", order);
   } catch (error) {
     errorResponse(res, 500, "Failed to cancel order", error.message);
