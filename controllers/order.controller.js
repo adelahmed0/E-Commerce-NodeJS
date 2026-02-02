@@ -57,8 +57,12 @@ export const createOrder = async (req, res) => {
       user: currentUser.id,
       totalPrice,
     });
-    const savedOrder = await newOrder.save();
-    successResponse(res, 201, "Order created successfully", savedOrder);
+    const savedOrder = await newOrder.save()
+    
+    const order = await Order.findById(savedOrder._id)
+      .populate("user")
+      .populate("items.product");
+    successResponse(res, 201, "Order created successfully", order);
   } catch (error) {
     errorResponse(res, 500, "Failed to create order", error.message);
   }
