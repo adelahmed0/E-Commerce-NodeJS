@@ -20,6 +20,8 @@ const orderItemSchema = new mongoose.Schema({
   },
 });
 
+orderItemSchema.plugin(toJSONPlugin);
+
 const orderSchema = new mongoose.Schema(
   {
     user: {
