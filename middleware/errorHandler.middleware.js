@@ -12,7 +12,7 @@
  */
 export const errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
-  let message = err.message || "Internal Server Error";
+  let message = err.message || req.t("common.internalServerError");
 
   // Handle Mongoose duplicate key error
   if (err.code === 11000) {
@@ -37,12 +37,12 @@ export const errorHandler = (err, req, res, next) => {
   // Handle JWT errors
   if (err.name === "JsonWebTokenError") {
     statusCode = 401;
-    message = "Invalid token";
+    message = req.t("common.invalidToken");
   }
 
   if (err.name === "TokenExpiredError") {
     statusCode = 401;
-    message = "Token expired";
+    message = req.t("common.tokenExpired");
   }
 
   const response = {
@@ -64,6 +64,6 @@ export const errorHandler = (err, req, res, next) => {
 export const notFoundHandler = (req, res, next) => {
   return res.status(404).json({
     success: false,
-    message: `Route ${req.originalUrl} not found`,
+    message: req.t("common.routeNotFound", { url: req.originalUrl }),
   });
 };

@@ -5,23 +5,14 @@ import { successResponse, errorResponse } from "../helpers/response.js";
 export const createCategory = async (req, res) => {
   try {
     if (!req.body.name || req.body.name.trim().length < 3) {
-      return errorResponse(
-        res,
-        400,
-        "Category name must be at least 3 characters long",
-      );
+      return errorResponse(res, 400, req.t("category.nameLength"));
     }
 
     const newCategory = await Category.create({
       name: req.body.name,
     });
 
-    return successResponse(
-      res,
-      201,
-      "Category created successfully",
-      newCategory,
-    );
+    return successResponse(res, 201, req.t("category.created"), newCategory);
   } catch (error) {
     return errorResponse(res, 500, error.message);
   }
@@ -32,12 +23,7 @@ export const getCategories = async (req, res) => {
   try {
     const categories = await Category.find();
 
-    return successResponse(
-      res,
-      200,
-      "Categories fetched successfully",
-      categories,
-    );
+    return successResponse(res, 200, req.t("category.fetched"), categories);
   } catch (error) {
     return errorResponse(res, 500, error.message);
   }
@@ -49,10 +35,10 @@ export const deleteCategory = async (req, res) => {
     const category = await Category.findByIdAndDelete(req.params.id);
 
     if (!category) {
-      return errorResponse(res, 404, "Category not found");
+      return errorResponse(res, 404, req.t("category.notFound"));
     }
 
-    return successResponse(res, 200, "Category deleted successfully", category);
+    return successResponse(res, 200, req.t("category.deleted"), category);
   } catch (error) {
     return errorResponse(res, 500, error.message);
   }
@@ -68,10 +54,10 @@ export const updateCategory = async (req, res) => {
     );
 
     if (!category) {
-      return errorResponse(res, 404, "Category not found");
+      return errorResponse(res, 404, req.t("category.notFound"));
     }
 
-    return successResponse(res, 200, "Category updated successfully", category);
+    return successResponse(res, 200, req.t("category.updated"), category);
   } catch (error) {
     return errorResponse(res, 500, error.message);
   }

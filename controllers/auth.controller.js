@@ -20,7 +20,7 @@ export const register = async (req, res) => {
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return errorResponse(res, 409, "User with this email already exists");
+      return errorResponse(res, 409, req.t("auth.userExists"));
     }
 
     // Create new user
@@ -38,14 +38,9 @@ export const register = async (req, res) => {
 
     await user.save();
 
-    return successResponse(
-      res,
-      201,
-      "User created successfully",
-      user.toJSON(),
-    );
+    return successResponse(res, 201, req.t("auth.userCreated"), user.toJSON());
   } catch (error) {
-    return errorResponse(res, 500, "Failed to create user", error.message);
+    return errorResponse(res, 500, req.t("auth.createFailed"), error.message);
   }
 };
 
@@ -57,24 +52,24 @@ export const login = async (req, res) => {
     // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
-      return errorResponse(res, 401, "Invalid email or password");
+      return errorResponse(res, 401, req.t("auth.invalidCredentials"));
     }
 
     // Check password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
-      return errorResponse(res, 401, "Invalid email or password");
+      return errorResponse(res, 401, req.t("auth.invalidCredentials"));
     }
 
     // Generate token
     const token = generateToken(user);
 
-    return successResponse(res, 200, "Login successful", {
+    return successResponse(res, 200, req.t("auth.loginSuccess"), {
       user: user.toJSON(),
       token,
     });
   } catch (error) {
-    return errorResponse(res, 500, "Failed to login", error.message);
+    return errorResponse(res, 500, req.t("auth.loginFailed"), error.message);
   }
 };
 
@@ -82,16 +77,21 @@ export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.auth.id).select("-password");
     if (!user) {
-      return errorResponse(res, 404, "User not found");
+      return errorResponse(res, 404, req.t("auth.userNotFound"));
     }
     return successResponse(
       res,
       200,
-      "Profile fetched successfully",
+      req.t("auth.profileFetched"),
       user.toJSON(),
     );
   } catch (error) {
-    return errorResponse(res, 500, "Failed to get profile", error.message);
+    return errorResponse(
+      res,
+      500,
+      req.t("auth.profileFetchFailed"),
+      error.message,
+    );
   }
 };
 
@@ -106,23 +106,28 @@ export const updateProfile = async (req, res) => {
         _id: { $ne: userId },
       });
       if (existingUser) {
-        return errorResponse(res, 409, "Email already exists");
+        return errorResponse(res, 409, req.t("auth.emailExists"));
       }
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return errorResponse(res, 404, "User not found");
+      return errorResponse(res, 404, req.t("auth.userNotFound"));
     }
     user.set(updateBody);
     await user.save();
     return successResponse(
       res,
       200,
-      "Profile updated successfully",
+      req.t("auth.profileUpdated"),
       user.toJSON(),
     );
   } catch (error) {
-    return errorResponse(res, 500, "Failed to update profile", error.message);
+    return errorResponse(
+      res,
+      500,
+      req.t("auth.profileUpdateFailed"),
+      error.message,
+    );
   }
 };

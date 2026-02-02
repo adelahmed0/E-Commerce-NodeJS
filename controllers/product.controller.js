@@ -19,14 +19,14 @@ export const createProduct = async (req, res) => {
     const savedProduct = await newProduct.save();
     await savedProduct.populate("category");
 
-    return successResponse(
-      res,
-      201,
-      "Product created successfully",
-      savedProduct,
-    );
+    return successResponse(res, 201, req.t("product.created"), savedProduct);
   } catch (error) {
-    return errorResponse(res, 500, "Failed to create product", error.message);
+    return errorResponse(
+      res,
+      500,
+      req.t("product.createFailed"),
+      error.message,
+    );
   }
 };
 
@@ -57,7 +57,7 @@ export const getProducts = async (req, res) => {
 
     const totalProducts = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalProducts / per_page);
-    return successResponse(res, 200, "Products fetched successfully", {
+    return successResponse(res, 200, req.t("product.fetchedAll"), {
       products,
       pagination: {
         total_count: totalProducts,
@@ -67,7 +67,12 @@ export const getProducts = async (req, res) => {
       },
     });
   } catch (error) {
-    return errorResponse(res, 500, "Failed to fetch products", error.message);
+    return errorResponse(
+      res,
+      500,
+      req.t("product.fetchAllFailed"),
+      error.message,
+    );
   }
 };
 
@@ -79,11 +84,11 @@ export const getProductById = async (req, res) => {
       { new: true },
     ).populate("category");
     if (!product) {
-      return errorResponse(res, 404, "Product not found");
+      return errorResponse(res, 404, req.t("product.notFound"));
     }
-    return successResponse(res, 200, "Product fetched successfully", product);
+    return successResponse(res, 200, req.t("product.fetched"), product);
   } catch (error) {
-    return errorResponse(res, 500, "Failed to fetch product", error.message);
+    return errorResponse(res, 500, req.t("product.fetchFailed"), error.message);
   }
 };
 
@@ -91,11 +96,16 @@ export const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) {
-      return errorResponse(res, 404, "Product not found");
+      return errorResponse(res, 404, req.t("product.notFound"));
     }
-    return successResponse(res, 200, "Product deleted successfully");
+    return successResponse(res, 200, req.t("product.deleted"));
   } catch (error) {
-    return errorResponse(res, 500, "Failed to delete product", error.message);
+    return errorResponse(
+      res,
+      500,
+      req.t("product.deleteFailed"),
+      error.message,
+    );
   }
 };
 
@@ -103,7 +113,7 @@ export const updateProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
-      return errorResponse(res, 404, "Product not found");
+      return errorResponse(res, 404, req.t("product.notFound"));
     }
 
     const { title, category, price, description, countInStock } = req.body;
@@ -142,13 +152,13 @@ export const updateProduct = async (req, res) => {
       { new: true, runValidators: true },
     ).populate("category");
 
-    return successResponse(
-      res,
-      200,
-      "Product updated successfully",
-      updatedProduct,
-    );
+    return successResponse(res, 200, req.t("product.updated"), updatedProduct);
   } catch (error) {
-    return errorResponse(res, 500, "Failed to update product", error.message);
+    return errorResponse(
+      res,
+      500,
+      req.t("product.updateFailed"),
+      error.message,
+    );
   }
 };

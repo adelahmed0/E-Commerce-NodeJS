@@ -34,7 +34,7 @@ export const authMiddleware = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
-      return errorResponse(res, 401, "Unauthorized");
+      return errorResponse(res, 401, req.t("common.unauthorized"));
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -49,6 +49,6 @@ export const authMiddleware = async (req, res, next) => {
 
     next();
   } catch (error) {
-    return errorResponse(res, 401, "Unauthorized");
+    return errorResponse(res, 401, req.t("common.unauthorized"));
   }
 };

@@ -10,24 +10,24 @@ export const createOrder = async (req, res) => {
 
     // validate order items
     if (!orderItems || orderItems.length === 0 || !Array.isArray(orderItems)) {
-      return errorResponse(res, 400, "No order items provided");
+      return errorResponse(res, 400, req.t("order.noItems"));
     }
     for (const item of orderItems) {
       if (!item.product || !item.quantity) {
-        return errorResponse(res, 400, "Invalid order items");
+        return errorResponse(res, 400, req.t("order.invalidItems"));
       }
       if (typeof item.quantity !== "number" || item.quantity < 1) {
-        return errorResponse(res, 400, "Invalid quantity");
+        return errorResponse(res, 400, req.t("order.invalidQuantity"));
       }
       if (!Number.isInteger(item.quantity)) {
-        return errorResponse(res, 400, "Invalid quantity");
+        return errorResponse(res, 400, req.t("order.invalidQuantity"));
       }
     }
     const productsIds = orderItems.map((item) => item.product);
 
     const products = await Product.find({ _id: { $in: productsIds } });
     if (products.length !== productsIds.length) {
-      return errorResponse(res, 404, "Some products not found");
+      return errorResponse(res, 404, req.t("order.productsNotFound"));
     }
 
     const ordersItemsWithPrices = [];
@@ -37,7 +37,7 @@ export const createOrder = async (req, res) => {
         (product) => product._id.toString() === item.product,
       );
       if (product.countInStock < item.quantity) {
-        return errorResponse(res, 400, `This product is out of stock`);
+        return errorResponse(res, 400, req.t("order.outOfStock"));
       }
       ordersItemsWithPrices.push({
         product: item.product,
@@ -66,9 +66,9 @@ export const createOrder = async (req, res) => {
     const order = await Order.findById(savedOrder._id)
       .populate("user")
       .populate("items.product");
-    successResponse(res, 201, "Order created successfully", order);
+    successResponse(res, 201, req.t("order.created"), order);
   } catch (error) {
-    errorResponse(res, 500, "Failed to create order", error.message);
+    errorResponse(res, 500, req.t("order.createFailed"), error.message);
   }
 };
 
@@ -98,7 +98,7 @@ export const getOrders = async (req, res) => {
       .limit(per_page);
     const totalOrders = await Order.countDocuments(filter);
     const totalPages = Math.ceil(totalOrders / per_page);
-    successResponse(res, 200, "Orders fetched successfully", {
+    successResponse(res, 200, req.t("order.fetchedAll"), {
       orders,
       pagination: {
         total_count: totalOrders,
@@ -108,7 +108,7 @@ export const getOrders = async (req, res) => {
       },
     });
   } catch (error) {
-    errorResponse(res, 500, "Failed to fetch orders", error.message);
+    errorResponse(res, 500, req.t("order.fetchAllFailed"), error.message);
   }
 };
 
@@ -120,7 +120,7 @@ export const getOrderById = async (req, res) => {
       .populate("items.product");
 
     if (!order) {
-      return errorResponse(res, 404, "Order not found");
+      return errorResponse(res, 404, req.t("order.notFound"));
     }
 
     const { auth: currentUser } = req;
@@ -129,16 +129,12 @@ export const getOrderById = async (req, res) => {
       currentUser.id.toString() !== order.user._id.toString() &&
       currentUser.role !== "admin"
     ) {
-      return errorResponse(
-        res,
-        403,
-        "You are not authorized to view this order",
-      );
+      return errorResponse(res, 403, req.t("order.unauthorizedView"));
     }
 
-    successResponse(res, 200, "Order fetched successfully", order);
+    successResponse(res, 200, req.t("order.fetched"), order);
   } catch (error) {
-    errorResponse(res, 500, "Failed to fetch order", error.message);
+    errorResponse(res, 500, req.t("order.fetchFailed"), error.message);
   }
 };
 
@@ -148,11 +144,11 @@ export const deleteOrder = async (req, res) => {
     const order = await Order.findByIdAndDelete(id);
 
     if (!order) {
-      return errorResponse(res, 404, "Order not found");
+      return errorResponse(res, 404, req.t("order.notFound"));
     }
-    successResponse(res, 200, "Order deleted successfully", order);
+    successResponse(res, 200, req.t("order.deleted"), order);
   } catch (error) {
-    errorResponse(res, 500, "Failed to delete order", error.message);
+    errorResponse(res, 500, req.t("order.deleteFailed"), error.message);
   }
 };
 
@@ -160,14 +156,16 @@ export const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
     if (!status) {
-      return errorResponse(res, 400, "Status is required");
+      return errorResponse(res, 400, req.t("order.statusRequired"));
     }
 
     if (!ORDER_STATUS_VALUES.includes(status)) {
       return errorResponse(
         res,
         400,
-        "Invalid status must be one of " + ORDER_STATUS_VALUES.join(", "),
+        req.t("order.invalidStatus", {
+          statuses: ORDER_STATUS_VALUES.join(", "),
+        }),
       );
     }
 
@@ -178,12 +176,12 @@ export const updateOrderStatus = async (req, res) => {
     );
 
     if (!order) {
-      return errorResponse(res, 404, "Order not found");
+      return errorResponse(res, 404, req.t("order.notFound"));
     }
 
-    successResponse(res, 200, "Order updated successfully", order);
+    successResponse(res, 200, req.t("order.updated"), order);
   } catch (error) {
-    errorResponse(res, 500, "Failed to update order", error.message);
+    errorResponse(res, 500, req.t("order.updateFailed"), error.message);
   }
 };
 
@@ -195,16 +193,12 @@ export const cancelOrder = async (req, res) => {
     const order = await Order.findById(id);
 
     if (!order) {
-      return errorResponse(res, 404, "Order not found");
+      return errorResponse(res, 404, req.t("order.notFound"));
     }
 
     // Check ownership
     if (order.user.toString() !== currentUser.id.toString()) {
-      return errorResponse(
-        res,
-        403,
-        "You are not authorized to cancel this order",
-      );
+      return errorResponse(res, 403, req.t("order.unauthorizedCancel"));
     }
 
     // Check status
@@ -212,7 +206,7 @@ export const cancelOrder = async (req, res) => {
       return errorResponse(
         res,
         400,
-        `Cannot cancel order because it is already ${order.status}`,
+        req.t("order.cannotCancel", { status: order.status }),
       );
     }
 
@@ -226,8 +220,8 @@ export const cancelOrder = async (req, res) => {
       });
     }
 
-    successResponse(res, 200, "Order cancelled successfully", order);
+    successResponse(res, 200, req.t("order.cancelled"), order);
   } catch (error) {
-    errorResponse(res, 500, "Failed to cancel order", error.message);
+    errorResponse(res, 500, req.t("order.cancelFailed"), error.message);
   }
 };

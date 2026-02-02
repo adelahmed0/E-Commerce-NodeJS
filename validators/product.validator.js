@@ -4,24 +4,24 @@ export const validateCreateProduct = [
   body("title")
     .trim()
     .notEmpty()
-    .withMessage("Product title is required")
+    .withMessage((value, { req }) => req.t("product.titleRequired"))
     .isLength({ min: 3, max: 100 })
-    .withMessage("Product title must be between 3 and 100 characters"),
+    .withMessage((value, { req }) => req.t("product.titleLength")),
 
   body("category")
     .notEmpty()
-    .withMessage("Product category is required")
+    .withMessage((value, { req }) => req.t("product.categoryRequired"))
     .isMongoId()
-    .withMessage("Invalid category ID"),
+    .withMessage((value, { req }) => req.t("product.invalidCategory")),
 
   body("price")
     .notEmpty()
-    .withMessage("Product price is required")
+    .withMessage((value, { req }) => req.t("product.priceRequired"))
     .isNumeric()
-    .withMessage("Price must be a number")
+    .withMessage((value, { req }) => req.t("product.priceNumber"))
     .custom((value) => {
       if (parseFloat(value) < 0) {
-        throw new Error("Price cannot be negative");
+        throw new Error(req.t("product.priceNegative"));
       }
       return true;
     }),
@@ -29,20 +29,20 @@ export const validateCreateProduct = [
   body("description")
     .trim()
     .notEmpty()
-    .withMessage("Product description is required")
+    .withMessage((value, { req }) => req.t("product.descriptionRequired"))
     .isLength({ min: 5, max: 1000 })
-    .withMessage("Description must be between 5 and 1000 characters"),
+    .withMessage((value, { req }) => req.t("product.descriptionLength")),
 
   body("countInStock")
     .notEmpty()
-    .withMessage("Product stock count is required")
+    .withMessage((value, { req }) => req.t("product.stockRequired"))
     .isInt({ min: 0, max: 1000 })
-    .withMessage("Stock count must be between 0 and 1000"),
+    .withMessage((value, { req }) => req.t("product.stockLimit")),
 
   // Custom validation for files (since they are in req.files)
   body("images").custom((value, { req }) => {
     if (!req.files || req.files.length === 0) {
-      throw new Error("At least one product image is required");
+      throw new Error(req.t("product.imageRequired"));
     }
     return true;
   }),
@@ -53,17 +53,20 @@ export const validateUpdateProduct = [
     .optional()
     .trim()
     .isLength({ min: 3, max: 100 })
-    .withMessage("Product title must be between 3 and 100 characters"),
+    .withMessage((value, { req }) => req.t("product.titleLength")),
 
-  body("category").optional().isMongoId().withMessage("Invalid category ID"),
+  body("category")
+    .optional()
+    .isMongoId()
+    .withMessage((value, { req }) => req.t("product.invalidCategory")),
 
   body("price")
     .optional()
     .isNumeric()
-    .withMessage("Price must be a number")
+    .withMessage((value, { req }) => req.t("product.priceNumber"))
     .custom((value) => {
       if (parseFloat(value) < 0) {
-        throw new Error("Price cannot be negative");
+        throw new Error(req.t("product.priceNegative"));
       }
       return true;
     }),
@@ -72,12 +75,12 @@ export const validateUpdateProduct = [
     .optional()
     .trim()
     .isLength({ min: 5, max: 1000 })
-    .withMessage("Description must be between 5 and 1000 characters"),
+    .withMessage((value, { req }) => req.t("product.descriptionLength")),
 
   body("countInStock")
     .optional()
     .isInt({ min: 0, max: 1000 })
-    .withMessage("Stock count must be between 0 and 1000"),
+    .withMessage((value, { req }) => req.t("product.stockLimit")),
 ];
 
 export const handleValidationErrors = (req, res, next) => {
@@ -85,7 +88,7 @@ export const handleValidationErrors = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({
       success: false,
-      message: "Validation failed",
+      message: req.t("common.validationFailed"),
       errors: errors.array().map((error) => ({
         field: error.path,
         message: error.msg,

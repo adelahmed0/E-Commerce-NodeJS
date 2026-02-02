@@ -7,72 +7,74 @@ export const validateRegistration = [
   body("email")
     .trim()
     .notEmpty()
-    .withMessage("Email is required")
+    .withMessage((value, { req }) => req.t("auth.emailRequired"))
     .isEmail()
-    .withMessage("Please provide a valid email address")
+    .withMessage((value, { req }) => req.t("auth.invalidEmail"))
     .normalizeEmail(),
 
   // Password validation
   body("password")
     .notEmpty()
-    .withMessage("Password is required")
+    .withMessage((value, { req }) => req.t("auth.passwordRequired"))
     .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters long"),
+    .withMessage((value, { req }) => req.t("auth.passwordMinLength")),
 
   // Username validation
   body("userName")
     .trim()
     .notEmpty()
-    .withMessage("Username is required")
+    .withMessage((value, { req }) => req.t("auth.usernameRequired"))
     .isLength({ min: 3, max: 50 })
-    .withMessage("Username must be between 3 and 50 characters"),
+    .withMessage((value, { req }) => req.t("auth.usernameLength")),
 
   // City validation
   body("city")
     .trim()
     .notEmpty()
-    .withMessage("City is required")
+    .withMessage((value, { req }) => req.t("auth.cityRequired"))
     .isLength({ min: 2, max: 100 })
-    .withMessage("City must be between 2 and 100 characters"),
+    .withMessage((value, { req }) => req.t("auth.cityLength")),
 
   // Postal code validation
   body("postalCode")
     .trim()
     .notEmpty()
-    .withMessage("Postal code is required")
+    .withMessage((value, { req }) => req.t("auth.postalCodeRequired"))
     .isLength({ min: 3, max: 20 })
-    .withMessage("Postal code must be between 3 and 20 characters"),
+    .withMessage((value, { req }) => req.t("auth.postalCodeLength")),
 
   // Address Line 1 validation
   body("addressLine1")
     .trim()
     .notEmpty()
-    .withMessage("Address Line 1 is required")
+    .withMessage((value, { req }) => req.t("auth.address1Required"))
     .isLength({ min: 5, max: 200 })
-    .withMessage("Address Line 1 must be between 5 and 200 characters"),
+    .withMessage((value, { req }) => req.t("auth.address1Length")),
 
   // Address Line 2 validation (optional)
   body("addressLine2")
     .optional()
     .trim()
     .isLength({ max: 200 })
-    .withMessage("Address Line 2 must be less than 200 characters"),
+    .withMessage((value, { req }) => req.t("auth.address2Length")),
 
   // Phone number validation
   body("phoneNumber")
     .trim()
     .notEmpty()
-    .withMessage("Phone number is required")
+    .withMessage((value, { req }) => req.t("auth.phoneRequired"))
     .matches(/^[\d\s\-\+\(\)]+$/)
-    .withMessage("Please provide a valid phone number")
+    .withMessage((value, { req }) => req.t("auth.invalidPhone"))
     .isLength({ min: 10, max: 20 })
-    .withMessage("Phone number must be between 10 and 20 characters"),
+    .withMessage((value, { req }) => req.t("auth.phoneLength")),
 
   // Role validation (optional, defaults to "user")
   body("role")
     .optional()
     .isIn(VALID_ROLES)
-    .withMessage(`Role must be one of: ${VALID_ROLES.join(", ")}`),
+    .withMessage((value, { req }) =>
+      req.t("auth.invalidRole", { roles: VALID_ROLES.join(", ") }),
+    ),
 ];
 
 // Validation rules for login
@@ -81,13 +83,15 @@ export const validateLogin = [
   body("email")
     .trim()
     .notEmpty()
-    .withMessage("Email is required")
+    .withMessage((value, { req }) => req.t("auth.emailRequired"))
     .isEmail()
-    .withMessage("Please provide a valid email address")
+    .withMessage((value, { req }) => req.t("auth.invalidEmail"))
     .normalizeEmail(),
 
   // Password validation
-  body("password").notEmpty().withMessage("Password is required"),
+  body("password")
+    .notEmpty()
+    .withMessage((value, { req }) => req.t("auth.passwordRequired")),
 ];
 
 // Validation rules for updating profile
@@ -97,7 +101,7 @@ export const validateUpdateProfile = [
     .optional()
     .trim()
     .isEmail()
-    .withMessage("Please provide a valid email address")
+    .withMessage((value, { req }) => req.t("auth.invalidEmail"))
     .normalizeEmail(),
 
   // Username validation (optional)
@@ -105,44 +109,44 @@ export const validateUpdateProfile = [
     .optional()
     .trim()
     .isLength({ min: 3, max: 50 })
-    .withMessage("Username must be between 3 and 50 characters"),
+    .withMessage((value, { req }) => req.t("auth.usernameLength")),
 
   // City validation (optional)
   body("city")
     .optional()
     .trim()
     .isLength({ min: 2, max: 100 })
-    .withMessage("City must be between 2 and 100 characters"),
+    .withMessage((value, { req }) => req.t("auth.cityLength")),
 
   // Postal code validation (optional)
   body("postalCode")
     .optional()
     .trim()
     .isLength({ min: 3, max: 20 })
-    .withMessage("Postal code must be between 3 and 20 characters"),
+    .withMessage((value, { req }) => req.t("auth.postalCodeLength")),
 
   // Address Line 1 validation (optional)
   body("addressLine1")
     .optional()
     .trim()
     .isLength({ min: 5, max: 200 })
-    .withMessage("Address Line 1 must be between 5 and 200 characters"),
+    .withMessage((value, { req }) => req.t("auth.address1Length")),
 
   // Address Line 2 validation (optional)
   body("addressLine2")
     .optional()
     .trim()
     .isLength({ max: 200 })
-    .withMessage("Address Line 2 must be less than 200 characters"),
+    .withMessage((value, { req }) => req.t("auth.address2Length")),
 
   // Phone number validation (optional)
   body("phoneNumber")
     .optional()
     .trim()
     .matches(/^[\d\s\-\+\(\)]+$/)
-    .withMessage("Please provide a valid phone number")
+    .withMessage((value, { req }) => req.t("auth.invalidPhone"))
     .isLength({ min: 10, max: 20 })
-    .withMessage("Phone number must be between 10 and 20 characters"),
+    .withMessage((value, { req }) => req.t("auth.phoneLength")),
 ];
 
 // Middleware to handle validation errors
@@ -151,7 +155,7 @@ export const handleValidationErrors = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({
       success: false,
-      message: "Validation failed",
+      message: req.t("common.validationFailed"),
       errors: errors.array().map((error) => ({
         field: error.path,
         message: error.msg,
