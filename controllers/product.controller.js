@@ -1,4 +1,4 @@
-import Product from "../models/product.model.js";
+import * as productService from "../services/product.service.js";
 import { successResponse, errorResponse } from "../helpers/response.js";
 import { getFileUrl } from "../middleware/upload.middleware.js";
 
@@ -8,17 +8,17 @@ export const createProduct = async (req, res) => {
     if (req.files && req.files.length > 0) {
       imagesUrls = req.files.map((file) => getFileUrl(req, file.filename));
     }
-    const newProduct = new Product({
+
+    const productData = {
       title: req.body.title,
       category: req.body.category,
       price: parseFloat(req.body.price),
       description: req.body.description,
       countInStock: parseInt(req.body.countInStock),
       images: imagesUrls,
-    });
-    const savedProduct = await newProduct.save();
-    await savedProduct.populate("category");
+    };
 
+    const savedProduct = await productService.createProduct(productData);
     return successResponse(res, 201, req.t("product.created"), savedProduct);
   } catch (error) {
     return errorResponse(
@@ -32,40 +32,15 @@ export const createProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
-    const search = req.query.search;
-    const categoryId = req.query.categoryId;
-
-    const page = parseInt(req.query.page) || 1;
-    const per_page = parseInt(req.query.per_page) || 5;
-    const skip = (page - 1) * per_page;
-
-    const filter = {};
-
-    if (search) {
-      filter.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ];
-    }
-    if (categoryId) {
-      filter.category = categoryId;
-    }
-    const products = await Product.find(filter)
-      .populate("category")
-      .skip(skip)
-      .limit(per_page);
-
-    const totalProducts = await Product.countDocuments(filter);
-    const totalPages = Math.ceil(totalProducts / per_page);
-    return successResponse(res, 200, req.t("product.fetchedAll"), {
-      products,
-      pagination: {
-        total_count: totalProducts,
-        current_page: page,
-        last_page: totalPages,
-        per_page: per_page,
-      },
+    const { search, categoryId, page, per_page } = req.query;
+    const result = await productService.getProducts({
+      search,
+      categoryId,
+      page: parseInt(page),
+      perPage: parseInt(per_page),
     });
+
+    return successResponse(res, 200, req.t("product.fetchedAll"), result);
   } catch (error) {
     return errorResponse(
       res,
@@ -78,32 +53,37 @@ export const getProducts = async (req, res) => {
 
 export const getProductById = async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      { $inc: { views: 1 } },
-      { new: true },
-    ).populate("category");
-    if (!product) {
-      return errorResponse(res, 404, req.t("product.notFound"));
-    }
+    const product = await productService.getProductById(req.params.id, true);
     return successResponse(res, 200, req.t("product.fetched"), product);
   } catch (error) {
-    return errorResponse(res, 500, req.t("product.fetchFailed"), error.message);
+    const statusCode = error.message === "product.notFound" ? 404 : 500;
+    return errorResponse(
+      res,
+      statusCode,
+      req.t(
+        error.message.startsWith("product.")
+          ? error.message
+          : "product.fetchFailed",
+      ),
+      error.message,
+    );
   }
 };
 
 export const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) {
-      return errorResponse(res, 404, req.t("product.notFound"));
-    }
+    await productService.deleteProduct(req.params.id);
     return successResponse(res, 200, req.t("product.deleted"));
   } catch (error) {
+    const statusCode = error.message === "product.notFound" ? 404 : 500;
     return errorResponse(
       res,
-      500,
-      req.t("product.deleteFailed"),
+      statusCode,
+      req.t(
+        error.message.startsWith("product.")
+          ? error.message
+          : "product.deleteFailed",
+      ),
       error.message,
     );
   }
@@ -111,15 +91,10 @@ export const deleteProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return errorResponse(res, 404, req.t("product.notFound"));
-    }
-
     const { title, category, price, description, countInStock } = req.body;
     const isReplacement = req.body.newImages === "true";
 
-    let updateData = {
+    const updateData = {
       title,
       category,
       price: price ? parseFloat(price) : undefined,
@@ -127,37 +102,29 @@ export const updateProduct = async (req, res) => {
       countInStock: countInStock ? parseInt(countInStock) : undefined,
     };
 
-    // Remove undefined fields
-    Object.keys(updateData).forEach(
-      (key) => updateData[key] === undefined && delete updateData[key],
-    );
-
+    let uploadedImages = [];
     if (req.files && req.files.length > 0) {
-      const uploadedImages = req.files.map((file) =>
-        getFileUrl(req, file.filename),
-      );
-
-      if (isReplacement) {
-        // Replace old images with new ones
-        updateData.images = uploadedImages;
-      } else {
-        // Append new images to existing ones
-        updateData.images = [...product.images, ...uploadedImages];
-      }
+      uploadedImages = req.files.map((file) => getFileUrl(req, file.filename));
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(
+    const updatedProduct = await productService.updateProduct(
       req.params.id,
       updateData,
-      { new: true, runValidators: true },
-    ).populate("category");
+      isReplacement,
+      uploadedImages,
+    );
 
     return successResponse(res, 200, req.t("product.updated"), updatedProduct);
   } catch (error) {
+    const statusCode = error.message === "product.notFound" ? 404 : 500;
     return errorResponse(
       res,
-      500,
-      req.t("product.updateFailed"),
+      statusCode,
+      req.t(
+        error.message.startsWith("product.")
+          ? error.message
+          : "product.updateFailed",
+      ),
       error.message,
     );
   }
