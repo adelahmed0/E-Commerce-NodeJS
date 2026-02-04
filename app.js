@@ -1,4 +1,5 @@
 import express from "express";
+import helmet from "helmet";
 import middleware from "i18next-http-middleware";
 import cors from "cors";
 import morgan from "morgan";
@@ -16,6 +17,8 @@ import { authMiddleware } from "./middleware/auth.middleware.js";
 
 const app = express();
 const api = process.env.API_PREFIX || "/api";
+
+app.use(helmet());
 
 // i18n initialization
 const i18next = configureI18n();
