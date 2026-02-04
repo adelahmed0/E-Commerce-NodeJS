@@ -5,7 +5,8 @@
     "internalServerError": "Internal Server Error",
     "invalidToken": "Invalid token",
     "tokenExpired": "Token expired",
-    "routeNotFound": "Route {{url}} not found"
+    "routeNotFound": "Route {{url}} not found",
+    "tooManyRequests": "Too many requests from this IP, please try again after 15 minutes"
   },
   "auth": {
     "emailRequired": "Email is required",

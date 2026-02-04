@@ -1,5 +1,6 @@
 import express from "express";
 import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
 import middleware from "i18next-http-middleware";
 import cors from "cors";
 import morgan from "morgan";
@@ -19,6 +20,19 @@ const app = express();
 const api = process.env.API_PREFIX || "/api";
 
 app.use(helmet());
+
+// Global Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+  standardHeaders: "draft-7", // set `RateLimit` and `RateLimit-Policy` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  message: (req) =>
+    req.t("common.tooManyRequests") ||
+    "Too many requests, please try again later.",
+});
+
+app.use(`${api}`, limiter);
 
 // i18n initialization
 const i18next = configureI18n();

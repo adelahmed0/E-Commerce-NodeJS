@@ -5,7 +5,8 @@
     "internalServerError": "خطأ داخلي في الخادم",
     "invalidToken": "رمز غير صالح",
     "tokenExpired": "انتهت صلاحية الرمز",
-    "routeNotFound": "المسار {{url}} غير موجود"
+    "routeNotFound": "المسار {{url}} غير موجود",
+    "tooManyRequests": "طلبات كثيرة جداً من هذا العنوان، يرجى المحاولة مرة أخرى بعد 15 دقيقة"
   },
   "auth": {
     "emailRequired": "البريد الإلكتروني مطلوب",
